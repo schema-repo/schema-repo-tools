@@ -44,6 +44,7 @@ import static java.lang.String.format;
  * Will recursively scan the schema directory (<pre>schemaDir</pre>) for <pre>schemeFileExt</pre>
  * files (defaults to <pre>.avsc</pre>) and attempts to register them
  * with the schema-repo identified by <pre>url</pre>.
+ * Files starting with dot ('.') will be ignored.
  * <p>If the corresponding subject does not exist (e.g. first version of the given schema),
  * the subject will be created.</p>
  * <p>Subject name is derived from schema file name using Strategy pattern, with specific strategy
@@ -80,19 +81,24 @@ public class RepoClientMojo extends AbstractMojo {
     getLog().info(format("Looking for %s files in %s", schemaFileExt.length() > 0 ? schemaFileExt : "all", schemaDir.getAbsolutePath()));
 
     SubjectNameStrategy subjectNameStrategy;
+    String step = null;
     try {
+      step = "resolve/instantiate";
       subjectNameStrategy = getClass().getClassLoader().loadClass(subjectNameStrategyClass).asSubclass(SubjectNameStrategy.class).newInstance();
+      step = "configure";
+      subjectNameStrategy.configure(project.getProperties());
     } catch (Exception e) {
       throw new MojoExecutionException(format(
-            "Invalid <subjectNameStrategyClass> parameter value %s -- failed to resolve/instantiate strategy", subjectNameStrategyClass));
+            "Invalid <subjectNameStrategyClass> parameter value %s -- failed to %s strategy", subjectNameStrategyClass, step));
     }
+    getLog().info("Using " + subjectNameStrategy);
 
     final List<Path> schemaPaths = new ArrayList<>();
     try {
       Files.walkFileTree(Paths.get(schemaDir.getAbsolutePath()), new SimpleFileVisitor<Path>() {
         @Override
         public FileVisitResult visitFile(final Path path, final BasicFileAttributes attrs) {
-          if (path.toString().endsWith(schemaFileExt)) {
+          if (path.toString().endsWith(schemaFileExt) && path.getFileName().toString().charAt(0) != '.') {
             schemaPaths.add(path);
           }
           return FileVisitResult.CONTINUE;

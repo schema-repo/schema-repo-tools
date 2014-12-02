@@ -22,20 +22,20 @@ import java.nio.file.Path;
 import java.util.Properties;
 
 /**
- * Strategy responsible for determining schema-repo subject name based on the schema file name.
- * The driver mojo will invoke {@link #configure(java.util.Properties)} method after construction.
+ * Default strategy responsible for determining schema-repo subject name based on the schema file name and path.
+ * Uses the file's name without extension.
  */
-public interface SubjectNameStrategy {
+public class DefaultSubjectNameStrategy implements SubjectNameStrategy {
 
-  String PROPERTIES_PREFIX = "schema-repo.registration.";
+  @Override
+  public String getSubjectName(final Path schemaPath) {
+    final String path = schemaPath.getFileName().toString();
+    final int dot = path.lastIndexOf('.');
+    return dot > -1 ? path.substring(0, dot) : path;
+  }
 
-  /**
-   * Translate schema file path to subject name.
-   * @param schemaPath path to the schema file, never null
-   * @return String subject, must be not null and not empty
-   */
-  String getSubjectName(Path schemaPath);
-
-  void configure(Properties properties);
+  @Override
+  public void configure(final Properties properties) {
+  }
 
 }
