@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<project
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+  xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <modelVersion>4.0.0</modelVersion>
+
+  <artifactId>schema-repo-maven-plugin</artifactId>
+  <parent>
+    <groupId>org.schemarepo.tools</groupId>
+    <artifactId>schema-repo-tools-parent</artifactId>
+    <version>0.1.1-SNAPSHOT</version>
+    <relativePath>../</relativePath>
+  </parent>
+
+  <packaging>maven-plugin</packaging>
+  <name>Schema Repository Maven Client Plugin</name>
+
+  <description>Maven plugin providing facilities to register schemas with a schema-repo</description>
+
+  <properties>
+    <maven-plugin-api.version>2.2.1</maven-plugin-api.version>
+  </properties>
+
+
+  <dependencies>
+
+    <dependency>
+      <groupId>org.schemarepo</groupId>
+      <artifactId>schema-repo-client</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-plugin-api</artifactId>
+      <version>2.2.1</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven.plugin-tools</groupId>
+      <artifactId>maven-plugin-annotations</artifactId>
+      <version>3.2</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-project</artifactId>
+      <version>2.0.10</version>
+    </dependency>
+
+  </dependencies>
+
+</project>
