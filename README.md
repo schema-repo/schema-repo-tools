@@ -3,7 +3,7 @@ Schema-Repo Tools
 
 Schema-Repo Tools houses a number of tools / addenda which support and supplement [Schema-Repo](http://schema-repo.org) project.
 
-## Maven Client plugin
+## Maven Client plugin (work in progress)
 
 This is a maven plugin which wraps schema-repo client and allows new schema(s) deployment to happen as part of maven build.
 
