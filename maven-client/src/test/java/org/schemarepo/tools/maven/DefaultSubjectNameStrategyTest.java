@@ -18,24 +18,29 @@
 
 package org.schemarepo.tools.maven;
 
+
+import static org.junit.Assert.assertEquals;
+
 import java.nio.file.Path;
-import java.util.Properties;
+import java.nio.file.Paths;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-/**
- * Strategy responsible for determining schema-repo subject name based on the schema file name.
- * The driver mojo will invoke {@link #configure(java.util.Properties)} method after construction.
- */
-public interface SubjectNameStrategy {
+import org.junit.Test;
 
-  String PROPERTIES_PREFIX = "schema-repo.tools.registration.";
+public class DefaultSubjectNameStrategyTest {
 
-  /**
-   * Translate schema file path to subject name.
-   * @param schemaPath path to the schema file, never null
-   * @return String subject, must be not null and not empty
-   */
-  String getSubjectName(Path schemaPath);
-
-  void configure(Properties properties);
+  @Test
+  public void testGetSubjectName() throws Exception {
+    DefaultSubjectNameStrategy subjectNameStrategy = new DefaultSubjectNameStrategy();
+    Map<Path, String> testData = new LinkedHashMap<>();
+    testData.put(Paths.get("schema"), "schema");
+    testData.put(Paths.get("schema."), "schema");
+    testData.put(Paths.get("schema.avsc"), "schema");
+    testData.put(Paths.get("path", "to", "schema.json"), "schema");
+    for (Map.Entry<Path, String> entry : testData.entrySet()) {
+      assertEquals(entry.getValue(), subjectNameStrategy.getSubjectName(entry.getKey()));
+    }
+  }
 
 }

@@ -60,7 +60,10 @@ public class HierarchicalSubjectNameStrategy extends DefaultSubjectNameStrategy 
   public void configure(final Properties properties) {
     separator = properties.getProperty(PROPERTIES_PREFIX + PROPETIES_SUBPREFIX + "separator", "_");
     numberOfAncestors = Integer.parseInt(
-        properties.getProperty(PROPERTIES_PREFIX + PROPETIES_SUBPREFIX + "numberOfAncestors", "0"));
+        properties.getProperty(PROPERTIES_PREFIX + PROPETIES_SUBPREFIX + "numberOfAncestors", "1"));
+    if (numberOfAncestors < 0) {
+      throw new IllegalArgumentException("numberOfAncestors property must be a non-negative integer");
+    }
   }
 
   @Override
