@@ -18,16 +18,21 @@
 
 package org.schemarepo.tools.maven;
 
+import static java.lang.String.format;
+import static org.schemarepo.tools.maven.PropertyKeys.REPO_CLIENT_PROPERTY_PREFIX;
+
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.FileVisitResult;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,11 +41,12 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
-
-import static java.lang.String.format;
+import org.schemarepo.SchemaEntry;
+import org.schemarepo.Subject;
+import org.schemarepo.client.RESTRepositoryClient;
 
 /**
- * Implements regiter goal of schema-repo plugin.
+ * Implements register goal of schema-repo plugin.
  * Will recursively scan the schema directory (<pre>schemaDir</pre>) for <pre>schemeFileExt</pre>
  * files (defaults to <pre>.avsc</pre>) and attempts to register them
  * with the schema-repo identified by <pre>url</pre>.
@@ -48,29 +54,67 @@ import static java.lang.String.format;
  * <p>If the corresponding subject does not exist (e.g. first version of the given schema),
  * the subject will be created.</p>
  * <p>Subject name is derived from schema file name using Strategy pattern, with specific strategy
- * class specified in the user's POM. Default stategy uses file name without extension as subject name.</p>
+ * class specified in the user's POM. Default strategy uses file name without extension as subject name.</p>
  */
 @Mojo( name = "register", defaultPhase = LifecyclePhase.DEPLOY)
 public class RepoClientMojo extends AbstractMojo {
 
-  private static final String IDL_EXT = ".avdl";
-  private static final String SCHEMA_EXT = ".avsc";
-
   @Parameter(required = true, readonly = true, defaultValue = "${project}")
-  private MavenProject project;
+  MavenProject project;
 
-  @Parameter(property = "schema-repo.register.schemaDir")
-  private File schemaDir;
+  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "schemaDir")
+  File schemaDir;
 
-  @Parameter(property = "schema-repo.register.schemaFileExt", defaultValue = ".avsc")
-  private String schemaFileExt;
+  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "schemaFileExt", defaultValue = ".avsc")
+  String schemaFileExt;
 
-  @Parameter(property = "schema-repo.register.subjectNameStrategyClass",
+  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "subjectNameStrategyClass",
       defaultValue = "org.schemarepo.tools.maven.DefaultSubjectNameStrategy")
-  private String subjectNameStrategyClass;
+  String subjectNameStrategyClass;
+
+  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "url")
+  String schemaRepoURL;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
+    verifySchemaDir();
+    final SubjectNameStrategy subjectNameStrategy = createSubjectNameStrategy();
+    final List<Path> schemaPaths = collectSchemas();
+    final RESTRepositoryClient client = configureRepositoryClient();
+
+    final Map<String, Subject> subjectMap = new HashMap<>();
+    for (Subject subject : client.subjects()) {
+      subjectMap.put(subject.getName(), subject);
+    }
+    getLog().info(format("Schema repo instance currently contains definitions for %s schemas", subjectMap.size()));
+
+    int failuresCnt = 0;
+    for (Path schemaPath : schemaPaths) {
+      String subjectName = null;
+      try {
+        subjectName = subjectNameStrategy.getSubjectName(schemaPath);
+        Subject subject = subjectMap.get(subjectName);
+        if (subject == null) {
+          getLog().debug(format("Creating subject %s", subjectName));
+          subject = client.register(subjectName, null);
+          subjectMap.put(subjectName, subject);
+        } else {
+          getLog().debug(format("subject %s is already registered", subjectName));
+        }
+        SchemaEntry schemaEntry = subject.register(new String(Files.readAllBytes(schemaPath)));
+        getLog().debug(format("Registered %s under subject %s with ID %s", schemaPath, subjectName, schemaEntry.getId()));
+      } catch (Exception e) {
+        getLog().error(format("Failed to register %s under subject %s", schemaPath, subjectName), e);
+      }
+    }
+
+    if (failuresCnt > 0) {
+      throw new MojoFailureException(this, "Schema registration failed",
+          format("%s schemas failed to get registered with the schema-repo, see above errors", failuresCnt));
+    }
+  }
+
+  private void verifySchemaDir() throws MojoExecutionException {
     if (!schemaDir.isAbsolute()) {
       schemaDir = new File(project.getBasedir(), schemaDir.getPath());
     }
@@ -79,7 +123,9 @@ public class RepoClientMojo extends AbstractMojo {
     }
     schemaFileExt = schemaFileExt != null ? schemaFileExt : "";
     getLog().info(format("Looking for %s files in %s", schemaFileExt.length() > 0 ? schemaFileExt : "all", schemaDir.getAbsolutePath()));
+  }
 
+  private SubjectNameStrategy createSubjectNameStrategy() throws MojoExecutionException {
     SubjectNameStrategy subjectNameStrategy;
     String step = null;
     try {
@@ -89,10 +135,19 @@ public class RepoClientMojo extends AbstractMojo {
       subjectNameStrategy.configure(project.getProperties());
     } catch (Exception e) {
       throw new MojoExecutionException(format(
-            "Invalid <subjectNameStrategyClass> parameter value %s -- failed to %s strategy", subjectNameStrategyClass, step));
+          "Invalid <subjectNameStrategyClass> parameter value %s -- failed to %s strategy", subjectNameStrategyClass, step));
     }
     getLog().info("Using " + subjectNameStrategy);
+    return subjectNameStrategy;
+  }
 
+  private RESTRepositoryClient configureRepositoryClient() {
+    final RESTRepositoryClient client = new RESTRepositoryClient(schemaRepoURL);
+    getLog().info(format("Connecting to schema-repo at %s", schemaRepoURL));
+    return client;
+  }
+
+  private List<Path> collectSchemas() throws MojoExecutionException {
     final List<Path> schemaPaths = new ArrayList<>();
     try {
       Files.walkFileTree(Paths.get(schemaDir.getAbsolutePath()), new SimpleFileVisitor<Path>() {
@@ -107,18 +162,8 @@ public class RepoClientMojo extends AbstractMojo {
     } catch (IOException e) {
       throw new MojoExecutionException(format("Failed to walk %s", schemaDir), e);
     }
-
     getLog().info(format("Found %s schema files", schemaPaths.size()));
-    boolean failures = false;
-    for (Path schemaPath : schemaPaths) {
-      String subjectName = subjectNameStrategy.getSubjectName(schemaPath);
-      getLog().debug(format("Attempting to register %s under subject %s", schemaPath, subjectName));
-    }
-
-    if (failures) {
-      throw new MojoFailureException(this, "Schema registration failed",
-          "One or more schemas failed to get registered with the schema-repo, see above errors");
-    }
+    return schemaPaths;
   }
 
 }

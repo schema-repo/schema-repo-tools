@@ -27,8 +27,6 @@ import java.util.Properties;
  */
 public interface SubjectNameStrategy {
 
-  String PROPERTIES_PREFIX = "schema-repo.tools.registration.";
-
   /**
    * Translate schema file path to subject name.
    * @param schemaPath path to the schema file, never null
