@@ -28,12 +28,11 @@ import java.util.Properties;
 
 /**
  * Default strategy responsible for determining schema-repo subject name based on the schema file name and path.
- * Uses the file's name without extension.
+ * Combines {@link org.schemarepo.tools.maven.DefaultSubjectNameStrategy} with one or more ancestor folders names
+ * (<pre>numberOfAncestors</pre>, defaults to <pre>1</pre>) joined by <pre>separator</pre> (defaults to <pre>_</pre>) string.
+ * <p>For example, with the default settings, <pre>parent/schema.avsc</pre> will generate <pre>parent_schema</pre> name.</p>
  */
 public class HierarchicalSubjectNameStrategy extends DefaultSubjectNameStrategy {
-
-  /** part of the properties names */
-
 
   private String separator;
   private int numberOfAncestors;

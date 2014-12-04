@@ -59,20 +59,22 @@ import org.schemarepo.client.RESTRepositoryClient;
 @Mojo( name = "register", defaultPhase = LifecyclePhase.DEPLOY)
 public class RepoClientMojo extends AbstractMojo {
 
+  static final String DEFAULT_SCHEMA_FILE_EXT = ".avsc";
+  static final String DEFAULT_SUBJECT_NAME_STRATEGY_CLASS = "org.schemarepo.tools.maven.DefaultSubjectNameStrategy";
+
   @Parameter(required = true, readonly = true, defaultValue = "${project}")
   MavenProject project;
 
-  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "schemaDir")
+  @Parameter(required = true, property = REPO_CLIENT_PROPERTY_PREFIX + "schemaDir")
   File schemaDir;
 
-  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "schemaFileExt", defaultValue = ".avsc")
+  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "schemaFileExt", defaultValue = DEFAULT_SCHEMA_FILE_EXT)
   String schemaFileExt;
 
-  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "subjectNameStrategyClass",
-      defaultValue = "org.schemarepo.tools.maven.DefaultSubjectNameStrategy")
+  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "subjectNameStrategyClass", defaultValue = DEFAULT_SUBJECT_NAME_STRATEGY_CLASS)
   String subjectNameStrategyClass;
 
-  @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "url")
+  @Parameter(required = true, property = REPO_CLIENT_PROPERTY_PREFIX + "url")
   String schemaRepoURL;
 
   @Override
@@ -104,6 +106,7 @@ public class RepoClientMojo extends AbstractMojo {
         SchemaEntry schemaEntry = subject.register(new String(Files.readAllBytes(schemaPath)));
         getLog().debug(format("Registered %s under subject %s with ID %s", schemaPath, subjectName, schemaEntry.getId()));
       } catch (Exception e) {
+        failuresCnt++;
         getLog().error(format("Failed to register %s under subject %s", schemaPath, subjectName), e);
       }
     }
