@@ -44,6 +44,7 @@ import org.apache.maven.project.MavenProject;
 import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.schemarepo.client.RESTRepositoryClient;
+import org.schemarepo.config.Config;
 
 /**
  * Implements register goal of schema-repo plugin.
@@ -56,7 +57,7 @@ import org.schemarepo.client.RESTRepositoryClient;
  * <p>Subject name is derived from schema file name using Strategy pattern, with specific strategy
  * class specified in the user's POM. Default strategy uses file name without extension as subject name.</p>
  */
-@Mojo( name = "register", defaultPhase = LifecyclePhase.DEPLOY)
+@Mojo( name = "register-schemas", defaultPhase = LifecyclePhase.DEPLOY)
 public class RepoClientMojo extends AbstractMojo {
 
   static final String DEFAULT_SCHEMA_FILE_EXT = ".avsc";
@@ -74,8 +75,8 @@ public class RepoClientMojo extends AbstractMojo {
   @Parameter(property = REPO_CLIENT_PROPERTY_PREFIX + "subjectNameStrategyClass", defaultValue = DEFAULT_SUBJECT_NAME_STRATEGY_CLASS)
   String subjectNameStrategyClass;
 
-  @Parameter(required = true, property = REPO_CLIENT_PROPERTY_PREFIX + "url")
-  String schemaRepoURL;
+  @Parameter(required = true, property = Config.CLIENT_SERVER_URL)
+  String serverURL;
 
   @Override
   public void execute() throws MojoExecutionException, MojoFailureException {
@@ -145,8 +146,8 @@ public class RepoClientMojo extends AbstractMojo {
   }
 
   private RESTRepositoryClient configureRepositoryClient() {
-    final RESTRepositoryClient client = new RESTRepositoryClient(schemaRepoURL);
-    getLog().info(format("Connecting to schema-repo at %s", schemaRepoURL));
+    final RESTRepositoryClient client = new RESTRepositoryClient(serverURL, false);
+    getLog().info(format("Connecting to schema-repo at %s", serverURL));
     return client;
   }
 

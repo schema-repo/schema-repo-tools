@@ -42,7 +42,7 @@ import org.schemarepo.server.RepositoryServer;
  * maven-test-harness -- the "proper" way to unit-test mojos -- is so broken in the latest versions of maven,
  * hence the somewhat clunky way this class employs.
  */
-public class RepoClientMojoTest {
+public class TestRepoClientMojo {
 
   private static final int JETTY_PORT = 32876;
   private static final String REPO_URL = "http://localhost:" + JETTY_PORT + Config.getDefault(Config.JETTY_PATH);
@@ -80,13 +80,13 @@ public class RepoClientMojoTest {
     mojo.schemaDir = schemaDir;
     mojo.schemaFileExt = schemaFileExt != null ? schemaFileExt : RepoClientMojo.DEFAULT_SCHEMA_FILE_EXT;
     mojo.subjectNameStrategyClass = RepoClientMojo.DEFAULT_SUBJECT_NAME_STRATEGY_CLASS;
-    mojo.schemaRepoURL = REPO_URL;
+    mojo.serverURL = REPO_URL;
     return mojo;
   }
 
   @Test
   public void testRegistration() throws Exception {
-    RESTRepositoryClient client = new RESTRepositoryClient(REPO_URL);
+    RESTRepositoryClient client = new RESTRepositoryClient(REPO_URL, true);
     // no schemas
     RepoClientMojo mojo = createMojo(new File("v1/"), null);
     mojo.execute();

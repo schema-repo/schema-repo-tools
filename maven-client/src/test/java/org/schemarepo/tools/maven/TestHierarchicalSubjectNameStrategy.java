@@ -28,7 +28,7 @@ import java.util.Properties;
 
 import org.junit.Test;
 
-public class HierarchicalSubjectNameStrategyTest {
+public class TestHierarchicalSubjectNameStrategy {
 
   @Test
   public void testGetSubjectName() throws Exception {

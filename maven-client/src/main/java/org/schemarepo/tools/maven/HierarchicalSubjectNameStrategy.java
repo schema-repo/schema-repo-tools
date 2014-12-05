@@ -18,7 +18,7 @@
 
 package org.schemarepo.tools.maven;
 
-import static org.schemarepo.tools.maven.PropertyKeys.HIERACHICAL_SUBJECT_NAME_STRATEGY_PROPERTIES_PREFIX;
+import static org.schemarepo.tools.maven.PropertyKeys.HIERARCHICAL_SUBJECT_NAME_STRATEGY_PROPERTIES_PREFIX;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -59,9 +59,9 @@ public class HierarchicalSubjectNameStrategy extends DefaultSubjectNameStrategy 
 
   @Override
   public void configure(final Properties properties) {
-    separator = properties.getProperty(HIERACHICAL_SUBJECT_NAME_STRATEGY_PROPERTIES_PREFIX + "separator", "_");
+    separator = properties.getProperty(HIERARCHICAL_SUBJECT_NAME_STRATEGY_PROPERTIES_PREFIX + "separator", "_");
     numberOfAncestors = Integer.parseInt(
-        properties.getProperty(HIERACHICAL_SUBJECT_NAME_STRATEGY_PROPERTIES_PREFIX + "numberOfAncestors", "1"));
+        properties.getProperty(HIERARCHICAL_SUBJECT_NAME_STRATEGY_PROPERTIES_PREFIX + "numberOfAncestors", "1"));
     if (numberOfAncestors < 0) {
       throw new IllegalArgumentException("numberOfAncestors property must be a non-negative integer");
     }

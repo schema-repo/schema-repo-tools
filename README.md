@@ -18,7 +18,7 @@ If the path is relative, prepends it with `project.basedir`. Required.
 * `schema-repo.tools.registration.schemaFileExt` : schema files extension to match. Defaults to `.avsc` (Avro JSON schema)
 * `schema-repo.tools.registration.subjectNameStrategyClass` : which subject name strategy class to use, see below.
 Defaults to `org.schemarepo.tools.maven.DefaultSubjectNameStrategy`
-* `schema-repo.tools.registration.url` : HTTP URL to the running schema-repo. Required.
+* `schema-repo.rest-client.server-url` : HTTP URL to the running schema-repo. Required.
 
 ### Subject name strategies
 Responsible for determining schema-repo subject name based on the schema file name and path.
@@ -34,14 +34,14 @@ Responsible for determining schema-repo subject name based on the schema file na
 ### Sample usage
 
     <plugin>
-        <groupId>org.schemarepo.tools</groupId>
+        <groupId>org.schemarepo</groupId>
         <artifactId>schema-repo-maven-plugin</artifactId>
         <version>0.0.1-SNAPSHOT</version>
         <executions>
             <execution>
                 <phase>deploy</phase>
                 <goals>
-                    <goal>register</goal>
+                    <goal>register-schemas</goal>
                 </goals>
                 <configuration>
                     <schemaDir>src/main/schema</schemaDir>

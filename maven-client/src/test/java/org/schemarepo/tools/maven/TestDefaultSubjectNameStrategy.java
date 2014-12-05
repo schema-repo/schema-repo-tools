@@ -28,7 +28,7 @@ import java.util.Map;
 
 import org.junit.Test;
 
-public class DefaultSubjectNameStrategyTest {
+public class TestDefaultSubjectNameStrategy {
 
   @Test
   public void testGetSubjectName() throws Exception {

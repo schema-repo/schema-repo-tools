@@ -7,7 +7,7 @@
 
   <artifactId>schema-repo-maven-plugin</artifactId>
   <parent>
-    <groupId>org.schemarepo.tools</groupId>
+    <groupId>org.schemarepo</groupId>
     <artifactId>schema-repo-tools-parent</artifactId>
     <version>0.1.1-SNAPSHOT</version>
     <relativePath>../</relativePath>
