@@ -45,6 +45,7 @@ import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.schemarepo.client.RESTRepositoryClient;
 import org.schemarepo.config.Config;
+import org.schemarepo.json.GsonJsonUtil;
 
 /**
  * Implements register goal of schema-repo plugin.
@@ -146,7 +147,7 @@ public class RepoClientMojo extends AbstractMojo {
   }
 
   private RESTRepositoryClient configureRepositoryClient() {
-    final RESTRepositoryClient client = new RESTRepositoryClient(serverURL, false);
+    final RESTRepositoryClient client = new RESTRepositoryClient(serverURL, new GsonJsonUtil(), false);
     getLog().info(format("Connecting to schema-repo at %s", serverURL));
     return client;
   }

@@ -81,7 +81,7 @@
 
     <!-- version properties for dependencies -->
     <junit.version>4.11</junit.version>
-    <schema-repo.version>0.1.2-SNAPSHOT</schema-repo.version>
+    <schema-repo.version>0.1.2</schema-repo.version>
     <maven-plugin-api.version>3.2.3</maven-plugin-api.version>
     <maven-plugin-annotations.version>3.3</maven-plugin-annotations.version>
     <maven-project.version>2.0.10</maven-project.version>

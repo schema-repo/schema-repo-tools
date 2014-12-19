@@ -35,6 +35,7 @@ import org.schemarepo.SchemaEntry;
 import org.schemarepo.Subject;
 import org.schemarepo.client.RESTRepositoryClient;
 import org.schemarepo.config.Config;
+import org.schemarepo.json.GsonJsonUtil;
 import org.schemarepo.server.RepositoryServer;
 
 /**
@@ -86,7 +87,7 @@ public class TestRepoClientMojo {
 
   @Test
   public void testRegistration() throws Exception {
-    RESTRepositoryClient client = new RESTRepositoryClient(REPO_URL, true);
+    RESTRepositoryClient client = new RESTRepositoryClient(REPO_URL, new GsonJsonUtil(), true);
     // no schemas
     RepoClientMojo mojo = createMojo(new File("v1/"), null);
     mojo.execute();
